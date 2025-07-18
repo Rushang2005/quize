@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PL-900 Power Platform Fundamentals Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card {
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease-in-out;
+        }
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .option-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .option-btn.selected {
+            border-color: #667eea;
+            background-color: #e0e7ff;
+        }
+        .option-btn.correct {
+            background-color: #d1fae5;
+            border-color: #10b981;
+            color: #065f46;
+        }
+        .option-btn.incorrect {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+        .progress-bar-inner {
+            transition: width 0.5s ease-in-out;
+        }
+        .certificate {
+            border: 10px solid #667eea;
+            background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
+        }
+        .certificate .cert-title {
+            font-family: 'EB Garamond', serif;
+        }
+        .seal {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-align: center;
+            border: 4px solid #fff;
+            box-shadow: 0 0 0 3px #667eea;
+        }
+        .signature-font {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.25rem; /* 36px */
+            color: #2d3748; /* A dark ink color */
+            line-height: 1;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="quiz-container" class="card w-full max-w-2xl mx-auto p-6 md:p-10">
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-2">PL-900 Practice Quiz</h1>
+            <p class="text-center text-gray-500 mb-8">Test your knowledge on Microsoft Power Platform Fundamentals.</p>
+            <div class="gradient-bg rounded-xl p-6 text-white text-center mb-8">
+                <h2 class="text-2xl font-bold mb-2">Ready to Start?</h2>
+                <p>This quiz consists of 10 multiple-choice questions. Good luck!</p>
+            </div>
+            <button id="start-btn" class="w-full gradient-bg text-white font-bold py-3 px-6 rounded-lg text-lg hover:opacity-90 transition-opacity">
+                Start Quiz
+            </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <p class="text-sm text-gray-500">Question <span id="question-number"></span> of <span id="total-questions"></span></p>
+                <p id="score" class="text-lg font-bold text-indigo-600">Score: 0</p>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6">
+                <div id="progress-bar" class="bg-indigo-500 h-2.5 rounded-full progress-bar-inner" style="width: 0%"></div>
+            </div>
+            <h2 id="question-text" class="text-xl md:text-2xl font-semibold text-gray-800 mb-6 min-h-[80px]"></h2>
+            <div id="options-container" class="space-y-4">
+                <!-- Options will be dynamically inserted here -->
+            </div>
+            <button id="next-btn" class="w-full mt-8 bg-gray-300 text-gray-500 font-bold py-3 px-6 rounded-lg cursor-not-allowed" disabled>
+                Next Question
+            </button>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="hidden text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Quiz Completed!</h1>
+            <p class="text-gray-600 mb-6">Here's how you did:</p>
+            <div class="gradient-bg rounded-xl p-8 text-white mb-8">
+                <p class="text-lg">Your Score</p>
+                <p id="final-score" class="text-6xl font-bold my-2"></p>
+                <p id="score-percentage" class="text-2xl"></p>
+            </div>
+            <div class="grid grid-cols-2 gap-4 text-lg mb-8">
+                <div class="bg-green-100 text-green-800 p-4 rounded-lg">
+                    <p class="font-bold" id="correct-answers"></p>
+                    <p>Correct</p>
+                </div>
+                <div class="bg-red-100 text-red-800 p-4 rounded-lg">
+                    <p class="font-bold" id="incorrect-answers"></p>
+                    <p>Incorrect</p>
+                </div>
+            </div>
+            <div class="space-y-4">
+                 <input type="text" id="name-input" placeholder="Enter your full name for the certificate" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                 <button id="certificate-btn" class="w-full gradient-bg text-white font-bold py-3 px-6 rounded-lg hover:opacity-90 transition-opacity">
+                    Generate Certificate
+                 </button>
+                 <button id="restart-btn" class="w-full bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors">
+                    Try Again
+                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Certificate Screen -->
+    <div id="certificate-screen" class="hidden w-full max-w-4xl mx-auto p-4">
+        <div id="certificate-content" class="certificate p-8 md:p-12 text-center relative">
+            <h1 class="cert-title text-4xl md:text-5xl font-bold text-indigo-700">Certificate of Completion</h1>
+            <p class="text-lg text-gray-600 mt-8">This certificate is proudly presented to</p>
+            <p id="cert-name" class="text-3xl md:text-4xl font-semibold text-gray-800 my-6 border-b-2 border-gray-400 pb-2 inline-block"></p>
+            <p class="text-lg text-gray-600">for successfully completing the</p>
+            <p class="text-2xl font-bold text-gray-700 my-4">PL-900 Power Platform Fundamentals Practice Quiz</p>
+            <p class="text-lg text-gray-600">with a score of <span id="cert-score" class="font-bold"></span></p>
+            <div class="flex justify-between items-center mt-12">
+                <div class="text-left">
+                    <p class="font-semibold border-t-2 border-gray-400 pt-2">Date</p>
+                    <p id="cert-date"></p>
+                </div>
+                <div class="seal">
+                    POWER PLATFORM QUIZ
+                </div>
+                <div class="text-right">
+                    <p class="font-semibold border-t-2 border-gray-400 pt-2">Signature</p>
+                    <p class="signature-font">Gemini AI</p>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-8 space-x-4">
+            <button id="print-btn" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition-colors">
+                Print / Save as PDF
+            </button>
+            <button id="back-to-results-btn" class="bg-gray-200 text-gray-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-300 transition-colors">
+                Back to Results
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "Which Power Platform component is best for building custom applications with low-code or no-code?",
+                options: ["Power BI", "Power Apps", "Power Automate", "Power Virtual Agents"],
+                answer: "Power Apps"
+            },
+            {
+                question: "What is the primary function of Power Automate?",
+                options: ["To analyze data and create visualizations", "To build chatbots", "To automate business processes and workflows", "To create custom web portals"],
+                answer: "To automate business processes and workflows"
+            },
+            {
+                question: "Which component is used to create interactive data visualizations and dashboards?",
+                options: ["Dataverse", "Power Apps", "Power BI", "Power Automate"],
+                answer: "Power BI"
+            },
+            {
+                question: "Microsoft Dataverse is best described as a:",
+                options: ["Reporting tool", "Scalable data service and app platform", "Workflow engine", "Chatbot service"],
+                answer: "Scalable data service and app platform"
+            },
+            {
+                question: "Which type of Power App is best suited for a task-based application that will be used primarily on mobile devices?",
+                options: ["Model-driven app", "Canvas app", "Portal app", "Dataverse app"],
+                answer: "Canvas app"
+            },
+            {
+                question: "In Power Automate, what is a 'trigger'?",
+                options: ["The action the flow performs", "The data source for the flow", "The event that starts the flow", "A condition within the flow"],
+                answer: "The event that starts the flow"
+            },
+            {
+                question: "What is the role of AI Builder in the Power Platform?",
+                options: ["To build custom connectors", "To provide AI models to optimize business processes", "To manage user security", "To design the user interface of an app"],
+                answer: "To provide AI models to optimize business processes"
+            },
+            {
+                question: "Which of the following is a key benefit of using Power Platform connectors?",
+                options: ["They are only for Microsoft services", "They require extensive coding to use", "They allow easy integration with hundreds of data sources and services", "They are used to create physical connections to servers"],
+                answer: "They allow easy integration with hundreds of data sources and services"
+            },
+            {
+                question: "Power Virtual Agents allows you to create:",
+                options: ["Complex data models", "Automated email campaigns", "Responsive websites", "Intelligent chatbots without code"],
+                answer: "Intelligent chatbots without code"
+            },
+            {
+                question: "What is a 'Model-driven app' in Power Apps primarily built upon?",
+                options: ["A blank canvas", "The structure of your business data in Dataverse", "A SharePoint list", "An Excel workbook"],
+                answer: "The structure of your business data in Dataverse"
+            }
+        ];
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const certificateScreen = document.getElementById('certificate-screen');
+        const quizContainer = document.getElementById('quiz-container');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const certificateBtn = document.getElementById('certificate-btn');
+        const printBtn = document.getElementById('print-btn');
+        const backToResultsBtn = document.getElementById('back-to-results-btn');
+
+        const questionNumberEl = document.getElementById('question-number');
+        const totalQuestionsEl = document.getElementById('total-questions');
+        const progressBar = document.getElementById('progress-bar');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const scoreEl = document.getElementById('score');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOption = null;
+
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', nextQuestion);
+        restartBtn.addEventListener('click', () => {
+             location.reload(); // Simple way to restart
+        });
+        certificateBtn.addEventListener('click', generateCertificate);
+        printBtn.addEventListener('click', () => window.print());
+        backToResultsBtn.addEventListener('click', () => {
+            certificateScreen.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+        });
+
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreEl.textContent = `Score: 0`;
+            totalQuestionsEl.textContent = quizData.length;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            resetState();
+            const question = quizData[currentQuestionIndex];
+            questionNumberEl.textContent = currentQuestionIndex + 1;
+            questionTextEl.textContent = question.question;
+
+            question.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('w-full', 'p-4', 'text-left', 'bg-gray-100', 'rounded-lg', 'option-btn', 'text-gray-700', 'font-medium');
+                button.addEventListener('click', () => selectOption(button, option));
+                optionsContainer.appendChild(button);
+            });
+
+            updateProgressBar();
+        }
+
+        function resetState() {
+            while (optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+            nextBtn.disabled = true;
+            nextBtn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+            nextBtn.classList.remove('gradient-bg', 'text-white');
+            selectedOption = null;
+        }
+
+        function selectOption(button, option) {
+            if (selectedOption) return; // Prevent changing answer
+
+            selectedOption = button;
+            const correctAnswer = quizData[currentQuestionIndex].answer;
+
+            // Remove selected class from all buttons before adding to the clicked one
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            button.classList.add('selected');
+
+            // Disable all options
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.disabled = true;
+            });
+
+            if (option === correctAnswer) {
+                score++;
+                scoreEl.textContent = `Score: ${score}`;
+                button.classList.add('correct');
+            } else {
+                button.classList.add('incorrect');
+                // Highlight the correct answer
+                Array.from(optionsContainer.children).forEach(btn => {
+                    if (btn.textContent === correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            nextBtn.disabled = false;
+            nextBtn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+            nextBtn.classList.add('gradient-bg', 'text-white');
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function updateProgressBar() {
+            const progressPercentage = ((currentQuestionIndex) / quizData.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            
+            const percentage = Math.round((score / quizData.length) * 100);
+            document.getElementById('final-score').textContent = `${score} / ${quizData.length}`;
+            document.getElementById('score-percentage').textContent = `${percentage}%`;
+            document.getElementById('correct-answers').textContent = score;
+            document.getElementById('incorrect-answers').textContent = quizData.length - score;
+        }
+
+        function generateCertificate() {
+            const name = document.getElementById('name-input').value;
+            if (!name.trim()) {
+                // Using a custom modal/toast in a real app would be better
+                // but alert is simple for this example.
+                const nameInput = document.getElementById('name-input');
+                nameInput.classList.add('border-red-500', 'ring-red-500');
+                nameInput.placeholder = "Please enter your name first!";
+                setTimeout(() => {
+                    nameInput.classList.remove('border-red-500', 'ring-red-500');
+                    nameInput.placeholder = "Enter your full name for the certificate";
+                }, 3000);
+                return;
+            }
+
+            const percentage = Math.round((score / quizData.length) * 100);
+            document.getElementById('cert-name').textContent = name;
+            document.getElementById('cert-score').textContent = `${percentage}%`;
+            document.getElementById('cert-date').textContent = new Date().toLocaleDateString();
+
+            quizContainer.classList.add('hidden');
+            certificateScreen.classList.remove('hidden');
+        }
+
+    </script>
+</body>
+</html>
