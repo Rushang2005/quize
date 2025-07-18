@@ -176,7 +176,8 @@
     </div>
 
     <script>
-        const quizData = [
+        // A larger bank of questions for randomization
+        const allQuestions = [
             {
                 question: "Which Power Platform component is best for building custom applications with low-code or no-code?",
                 options: ["Power BI", "Power Apps", "Power Automate", "Power Virtual Agents"],
@@ -226,8 +227,60 @@
                 question: "What is a 'Model-driven app' in Power Apps primarily built upon?",
                 options: ["A blank canvas", "The structure of your business data in Dataverse", "A SharePoint list", "An Excel workbook"],
                 answer: "The structure of your business data in Dataverse"
+            },
+            {
+                question: "What is the purpose of 'Solutions' in the Power Platform?",
+                options: ["To provide answers to common problems", "To manage, package, and deploy customizations across environments", "To analyze solution performance", "To create pre-built applications"],
+                answer: "To manage, package, and deploy customizations across environments"
+            },
+            {
+                question: "What type of connector allows you to connect to services that do NOT have a pre-built connector?",
+                options: ["Standard Connector", "Premium Connector", "Custom Connector", "Dataverse Connector"],
+                answer: "Custom Connector"
+            },
+            {
+                question: "In Dataverse, what is a 'table'?",
+                options: ["A visual report", "A container for rows (records) and columns (fields)", "A type of Power Automate flow", "A user interface component"],
+                answer: "A container for rows (records) and columns (fields)"
+            },
+            {
+                question: "Which Power Platform feature helps ensure data quality by defining server-side logic and validation?",
+                options: ["Canvas App Formulas", "Business Rules", "Power BI DAX", "Cloud Flow Expressions"],
+                answer: "Business Rules"
+            },
+            {
+                question: "Which Power Automate flow type runs on a recurring schedule that you define?",
+                options: ["Automated cloud flow", "Instant cloud flow", "Business process flow", "Scheduled cloud flow"],
+                answer: "Scheduled cloud flow"
+            },
+            {
+                question: "What is the primary purpose of a Power Apps portal?",
+                options: ["To manage internal company workflows", "To build internal-only mobile apps", "To build external-facing websites for users outside your organization", "To analyze company data"],
+                answer: "To build external-facing websites for users outside your organization"
+            },
+            {
+                question: "What does DLP stand for in the context of the Power Platform?",
+                options: ["Data Link Protocol", "Dynamic Language Processing", "Data Loss Prevention", "Dashboard Layout Profile"],
+                answer: "Data Loss Prevention"
+            },
+            {
+                question: "What is the difference between a standard and a premium connector?",
+                options: ["Standard connectors are faster", "Premium connectors require an additional license (e.g., a standalone Power Apps plan)", "Standard connectors can only be used in Power Apps", "Premium connectors are built by third parties"],
+                answer: "Premium connectors require an additional license (e.g., a standalone Power Apps plan)"
+            },
+            {
+                question: "What is a 'collection' in a Power Apps canvas app?",
+                options: ["A group of screens", "A table of data stored in memory within the app", "A connection to an external data source", "A set of user permissions"],
+                answer: "A table of data stored in memory within the app"
+            },
+            {
+                question: "What is the Common Data Model (CDM)?",
+                options: ["A type of Power App", "A specific connector for SQL", "A standardized data schema used by Dataverse to ensure interoperability", "A security model for the Power Platform"],
+                answer: "A standardized data schema used by Dataverse to ensure interoperability"
             }
         ];
+
+        let quizData = []; // This will hold the 10 questions for the current session.
 
         const startScreen = document.getElementById('start-screen');
         const quizScreen = document.getElementById('quiz-screen');
@@ -256,7 +309,8 @@
         startBtn.addEventListener('click', startQuiz);
         nextBtn.addEventListener('click', nextQuestion);
         restartBtn.addEventListener('click', () => {
-             location.reload(); // Simple way to restart
+            resultScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
         });
         certificateBtn.addEventListener('click', generateCertificate);
         printBtn.addEventListener('click', () => window.print());
@@ -265,8 +319,26 @@
             quizContainer.classList.remove('hidden');
         });
 
+        /**
+         * Shuffles an array in place using the Fisher-Yates algorithm.
+         * @param {Array} array The array to shuffle.
+         */
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
 
         function startQuiz() {
+            // Create a shuffled copy of the main question bank
+            const shuffledQuestions = [...allQuestions];
+            shuffleArray(shuffledQuestions);
+
+            // Select the first 10 questions for this quiz session
+            quizData = shuffledQuestions.slice(0, 10);
+
+            // Reset quiz state
             startScreen.classList.add('hidden');
             resultScreen.classList.add('hidden');
             quizScreen.classList.remove('hidden');
@@ -310,26 +382,24 @@
             selectedOption = button;
             const correctAnswer = quizData[currentQuestionIndex].answer;
 
-            // Remove selected class from all buttons before adding to the clicked one
             Array.from(optionsContainer.children).forEach(btn => {
                 btn.classList.remove('selected');
+                btn.disabled = true; // Disable all options after one is selected
             });
             button.classList.add('selected');
-
-            // Disable all options
-            Array.from(optionsContainer.children).forEach(btn => {
-                btn.disabled = true;
-            });
 
             if (option === correctAnswer) {
                 score++;
                 scoreEl.textContent = `Score: ${score}`;
+                button.classList.remove('bg-gray-100');
                 button.classList.add('correct');
             } else {
+                button.classList.remove('bg-gray-100');
                 button.classList.add('incorrect');
                 // Highlight the correct answer
                 Array.from(optionsContainer.children).forEach(btn => {
                     if (btn.textContent === correctAnswer) {
+                        btn.classList.remove('bg-gray-100');
                         btn.classList.add('correct');
                     }
                 });
@@ -368,8 +438,6 @@
         function generateCertificate() {
             const name = document.getElementById('name-input').value;
             if (!name.trim()) {
-                // Using a custom modal/toast in a real app would be better
-                // but alert is simple for this example.
                 const nameInput = document.getElementById('name-input');
                 nameInput.classList.add('border-red-500', 'ring-red-500');
                 nameInput.placeholder = "Please enter your name first!";
